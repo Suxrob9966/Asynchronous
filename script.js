@@ -42,6 +42,8 @@ getCountryData('iran');
 getCountryData('china');
 *******************/
 
+////////////////////////////////
+// Welcome to Callback Hell
 const renderCountry = function(data, className = ''){
     const html = `<article class="country ${className}">
     <img class="country__img" src=${data.flag} />
@@ -57,7 +59,7 @@ const renderCountry = function(data, className = ''){
   countriesContainer.insertAdjacentHTML('beforeend', html);
   countriesContainer.style.opacity = 1;
 }
-
+/*
 const getCountryAndNeighbor = function(country){
     // AJAX call country 1
     const request = new XMLHttpRequest();
@@ -65,7 +67,7 @@ const getCountryAndNeighbor = function(country){
     request.send();
     
     request.addEventListener('load', function(){
-        
+        // console.log(this.responseText);
         const [data] = JSON.parse(this.responseText);
         console.log(data);
         // Render country 1
@@ -92,3 +94,44 @@ const getCountryAndNeighbor = function(country){
     };
 
     getCountryAndNeighbor('usa');
+    */
+
+   // Callback hell
+   // setTimeout(function(){
+   //     console.log('1 second passed');
+   //     setTimeout(function(){
+   //         console.log('2 seconds passed');
+   //         setTimeout(function(){
+   //             console.log('3 seconds passed');
+   //             setTimeout(function(){
+   //                 console.log('4 seconds passed');
+   //             },1000)
+   //         },1000)
+   //     },1000)
+   // },1000)
+
+   
+    // PROMISES
+    /*
+    const getCountryData = function(country){
+        // on returned promise from fetch() we call then() method that takes callback function as a parameter. that callback function's argument is the result of fetch() which is 'response' in our case
+        fetch(`https://restcountries.eu/rest/v2/name/${country}`).then(function(response){
+            console.log(response);
+            // we need to read the response. we use json() method for this
+            // json() method is also an asynchronous function which returns promise
+            return response.json();
+            // the result of the returned value is the data that we want. we need to call then() again with callback function to see the actual data
+        }).then(function(data){
+            console.log(data);
+            renderCountry(data[0]);
+        })
+    };*/
+
+    // simplified - same as above 
+    const getCountryData = function(country){
+        fetch(`https://restcountries.eu/rest/v2/name/${country}`)
+        .then((response) => response.json())
+        .then((data)=> renderCountry(data[0]));
+    };
+
+    getCountryData('uzbekistan');
