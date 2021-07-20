@@ -3,6 +3,27 @@
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 
+const renderCountry = function(data, className = ''){
+    const html = `<article class="country ${className}">
+    <img class="country__img" src=${data.flag} />
+    <div class="country__data">
+      <h3 class="country__name">${data.name}</h3>
+      <h4 class="country__region">${data.region}</h4>
+      <p class="country__row"><span>👫</span>${(+data.population / 1000000).toFixed(1)}</p>
+      <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
+      <p class="country__row"><span>💰</span>${data.currencies[0].name}</p>
+    </div>
+  </article>`;
+
+  countriesContainer.insertAdjacentHTML('beforeend', html);
+//   countriesContainer.style.opacity = 1;
+}
+
+const renderErr = function(msg){
+    countriesContainer.insertAdjacentText('beforeend', msg);
+    // countriesContainer.style.opacity = 1;
+};
+
 /////////////////////////////////////// 
 /****************
 const getCountryData = function(country){
@@ -44,21 +65,6 @@ getCountryData('china');
 
 ////////////////////////////////
 // Welcome to Callback Hell
-const renderCountry = function(data, className = ''){
-    const html = `<article class="country ${className}">
-    <img class="country__img" src=${data.flag} />
-    <div class="country__data">
-      <h3 class="country__name">${data.name}</h3>
-      <h4 class="country__region">${data.region}</h4>
-      <p class="country__row"><span>👫</span>${(+data.population / 1000000).toFixed(1)}</p>
-      <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
-      <p class="country__row"><span>💰</span>${data.currencies[0].name}</p>
-    </div>
-  </article>`;
-
-  countriesContainer.insertAdjacentHTML('beforeend', html);
-  countriesContainer.style.opacity = 1;
-}
 /*
 const getCountryAndNeighbor = function(country){
     // AJAX call country 1
@@ -127,11 +133,112 @@ const getCountryAndNeighbor = function(country){
         })
     };*/
 
-    // simplified - same as above 
+    /*
+    // simplified - same as above (this one shows country and its neighbor and the neighbor of the neighbor)
     const getCountryData = function(country){
+        // Country 1
         fetch(`https://restcountries.eu/rest/v2/name/${country}`)
         .then((response) => response.json())
-        .then((data)=> renderCountry(data[0]));
+        .then((data)=> {
+            renderCountry(data[0]);
+            const neighbor = data[0].borders[0];
+            if(!neighbor) return;
+
+            // Country 2
+            return fetch(`https://restcountries.eu/rest/v2/alpha/${neighbor}`);
+        })
+        .then(response => response.json())
+        .then(data => {
+            renderCountry(data, 'neighbour')
+
+            const neigh2 = data.borders[0];
+            if(!neigh2) return;
+
+            // Country 3
+            return fetch(`https://restcountries.eu/rest/v2/alpha/${neigh2}`)
+        })
+        .then(response => response.json())
+        .then(data => renderCountry(data, 'neighbour'));
+    };
+    */
+   const getJSON = function(url, errorMsg = 'Something went wrong'){
+       return fetch(url).then( response => {
+           if(!response.ok) {
+               throw new Error(`${errorMsg} ${response.status}`);
+           }
+           return response.json();
+       })
+   }
+
+    /****** // same as under but detailed
+    const getCountryData = function(country){
+        // Country 1
+        fetch(`https://restcountries.eu/rest/v2/name/${country}`)
+        .then(
+        (response) => {
+            // create our own error i case of inexisting country, the error is propagated down to catch block immediately with err. message
+            if(!response.ok) throw new Error(`Country not found (${response.status})`);
+
+            return response.json()
+        })
+        .then((data)=> {
+            renderCountry(data[0]);
+            // const neighbor = data[0].borders[0];
+            const neighbor = 'asdsad';
+
+            if(!neighbor) return;
+
+            // Country 2
+            return fetch(`https://restcountries.eu/rest/v2/alpha/${neighbor}`);
+        })
+        .then(response => {
+            if(!response.ok) throw new Error(`Country not found (${response.status})`);
+            return response.json()
+        })
+        .then(data => {
+            renderCountry(data, 'neighbour')
+        })
+        // add catch() method at the end to handle errors
+        .catch(err => {
+            // console.error(`${err}🔥`);
+            renderErr(`Something went wrong! 🔥🔥🔥 ${err.message}. Try again later!`);
+        })
+        // finally() gets executed no matter the promise is fulfilled or rejected
+        .finally(()=>{
+            countriesContainer.style.opacity = 1;
+        });
+    };
+    *****/
+    
+    const getCountryData = function(country){
+        // Country 1
+        getJSON(`https://restcountries.eu/rest/v2/name/${country}`, 'Country not found')
+        .then((data)=> {
+            renderCountry(data[0]);
+            const neighbor = data[0].borders[0];
+            // const neighbor = 'asdsad';
+            console.log(neighbor);
+            if(!neighbor) throw new Error('No neighbor found!');
+
+            // Country 2
+            return getJSON(`https://restcountries.eu/rest/v2/alpha/${neighbor}`, 'Country not found');
+        })
+        .then(data => {
+            renderCountry(data, 'neighbour')
+        })
+        // add catch() method at the end to handle errors
+        .catch(err => {
+            // console.error(`${err}🔥`);
+            renderErr(`Something went wrong! 🔥🔥🔥 ${err.message}. Try again later!`);
+        })
+        // finally() gets executed no matter the promise is fulfilled or rejected
+        .finally(()=>{
+            countriesContainer.style.opacity = 1;
+        });
     };
 
-    getCountryData('uzbekistan');
+    btn.addEventListener('click', function(){
+        getCountryData('russia');
+    })
+
+    getCountryData('australia'); // trying to read inexisting country data
