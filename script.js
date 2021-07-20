@@ -241,4 +241,4 @@ const getCountryAndNeighbor = function(country){
         getCountryData('russia');
     })
 
-    getCountryData('australia'); // trying to read inexisting country data
+    getCountryData('Russia'); // trying to read inexisting country data
