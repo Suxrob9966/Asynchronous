@@ -237,8 +237,76 @@ const getCountryAndNeighbor = function(country){
         });
     };
 
-    btn.addEventListener('click', function(){
-        getCountryData('russia');
-    })
+    btn.addEventListener('click', getCountryData.bind(null,'china'));
 
-    getCountryData('Russia'); // trying to read inexisting country data
+    // getCountryData('Russia'); // trying to read inexisting country data
+
+    /*****
+    // Resolved promise
+    console.log("Test start");
+    setTimeout(()=> console.log('0 sec timer'), 0); // will be stored in callback queue
+    Promise.resolve('Resolved promise 1').then(res => console.log(res)); // will be stored in micro tasks queue
+    Promise.resolve('Resolved promise 2').then(res => {
+        for(let i =0; i< 10000; i++){}
+        console.log(res)
+    }); // will be stored in micro tasks queue. tasks in this queue have higher priority over the callback queue and will be done first
+    console.log('Test end');
+    *****/
+
+
+    // Creating promises
+    /******
+    // Promise constructor takes one parameter - executor function which in turn takes two parameters: resolve and reject. 
+    // then resolve method is called if the promise is fulfilled and reject if not.
+    const lotteryPromise = new Promise(function(resolve, reject){
+        console.log('Lottery draw is happening');
+           setTimeout(function(){
+            if(Math.random() >= 0.5){
+                resolve('You win 💰');
+            }else{
+                reject( new Error('You lost your money 😛'));
+            };
+        }, 2000);
+    });
+    // if resolved promise goes into then() method and if rejected it will go into catch() method
+    lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
+    ******/
+    // Promisifying setTimoeout
+    const wait = function(seconds){
+        return new Promise(function(resolve){
+            setTimeout(resolve, seconds * 1000);
+        });
+    };
+
+    wait(1)
+    .then(()=>{
+        console.log('I waited for 1 second');
+        return wait(1);
+    })
+    .then(()=>{
+        console.log('I waited for 2 seconds');
+        return wait(1);
+    })
+    .then(()=>{
+        console.log('I waited for 3 seconds');
+        return wait(1);
+    })
+    .then(()=> console.log('I waited for 4 seconds'));
+
+    // The above with callback hell
+   // setTimeout(function(){
+   //     console.log('1 second passed');
+   //     setTimeout(function(){
+   //         console.log('2 seconds passed');
+   //         setTimeout(function(){
+   //             console.log('3 seconds passed');
+   //             setTimeout(function(){
+   //                 console.log('4 seconds passed');
+   //             },1000)
+   //         },1000)
+   //     },1000)
+   // },1000)
+
+   // Creating resolve and reject
+   Promise.resolve('Something').then(x => console.log(x));
+   Promise.reject(new Error('Problem')).catch(x => console.error(x));
