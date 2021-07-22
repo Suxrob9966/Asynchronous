@@ -2,6 +2,7 @@
 
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
+const images = document.querySelector('.images');
 
 const renderCountry = function(data, className = ''){
     const html = `<article class="country ${className}">
@@ -237,7 +238,7 @@ const getCountryAndNeighbor = function(country){
         });
     };
 
-    btn.addEventListener('click', getCountryData.bind(null,'china'));
+    // btn.addEventListener('click', getCountryData.bind(null,'china'));
 
     // getCountryData('Russia'); // trying to read inexisting country data
 
@@ -271,6 +272,8 @@ const getCountryAndNeighbor = function(country){
     // if resolved promise goes into then() method and if rejected it will go into catch() method
     lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
     ******/
+
+    // /*********
     // Promisifying setTimoeout
     const wait = function(seconds){
         return new Promise(function(resolve){
@@ -278,7 +281,7 @@ const getCountryAndNeighbor = function(country){
         });
     };
 
-    wait(1)
+   /* wait(1)
     .then(()=>{
         console.log('I waited for 1 second');
         return wait(1);
@@ -291,7 +294,7 @@ const getCountryAndNeighbor = function(country){
         console.log('I waited for 3 seconds');
         return wait(1);
     })
-    .then(()=> console.log('I waited for 4 seconds'));
+    .then(()=> console.log('I waited for 4 seconds')); */
 
     // The above with callback hell
    // setTimeout(function(){
@@ -308,5 +311,101 @@ const getCountryAndNeighbor = function(country){
    // },1000)
 
    // Creating resolve and reject
-   Promise.resolve('Something').then(x => console.log(x));
-   Promise.reject(new Error('Problem')).catch(x => console.error(x));
+//    Promise.resolve('Something').then(x => console.log(x));
+//    Promise.reject(new Error('Problem')).catch(x => console.error(x));
+// **********/
+
+// Promisifying geolocation
+const getPosition = function(){
+    return new Promise(function(resolve, reject){
+        // navigator.geolocation.getCurrentPosition(
+        //     position => resolve(position), 
+        //     err => reject(err));
+        navigator.geolocation.getCurrentPosition(resolve, reject); // the same as above
+    });
+};
+
+// getPosition().then(pos => console.log(pos)).catch(err => console.error(err));
+
+const whereAmI = function(){
+    
+    getPosition().then(pos => {
+        const {latitude, longitude} = pos.coords;
+        // console.log(latitude,longitude);
+
+    return fetch(`https://geocode.xyz/${latitude},${longitude}?geoit=json`);
+  })
+    .then(response => {
+        // console.log(response);
+        if(!response.ok) throw new Error(`Problem with geocoding ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        console.log(data);
+        console.log(`You are in ${data.city}, ${data.country}`);
+
+        return fetch(`https://restcountries.eu/rest/v2/name/${data.country}`);
+    })  
+    .then(response => response.json())
+    .then(data => {
+        renderCountry(data[0]);
+    })  
+    .catch(err => {
+        // console.log(`Something went wrong (${err.message})`);
+        renderErr(`Something went wrong (${err.message}) 🔥`);
+    })
+    .finally(() => countriesContainer.style.opacity = 1);
+}
+
+btn.addEventListener('click', whereAmI);
+
+
+const createImage = function(imgPath){
+    return new Promise(function(resolve, reject){
+      const img = document.createElement('img');
+       img.src = imgPath;
+
+    img.addEventListener('load', function(){
+            images.append(img);
+            resolve(img);
+        })
+       
+    img.addEventListener('error', function(){
+        reject(new Error('Invalid image URL'));
+    });
+        
+    });
+    
+};
+
+let currentImage;
+
+createImage('img/img-1.jpg')
+.then(img => {
+    currentImage = img;
+    console.log('Image 1 has loaded');
+    return wait(2);
+})
+.then(() => {
+    currentImage.style.display = 'none';
+    return createImage('img/img-2.jpg');
+})
+.then(img => {
+    currentImage = img;
+    console.log('Image 2 has loaded');
+    return wait(2);
+})
+.then(() => {
+    currentImage.style.display = 'none';
+})
+.catch(err => console.error(err));
+
+
+// function createImage2(url){
+//     const img = document.createElement('img');
+//     img.src = url;
+//     img.addEventListener('load', function(e){
+//         // e.preventDefault();
+//         images.append(img);
+//     })
+// }
