@@ -17,12 +17,12 @@ const renderCountry = function(data, className = ''){
   </article>`;
 
   countriesContainer.insertAdjacentHTML('beforeend', html);
-//   countriesContainer.style.opacity = 1;
+  countriesContainer.style.opacity = 1;
 }
 
 const renderErr = function(msg){
     countriesContainer.insertAdjacentText('beforeend', msg);
-    // countriesContainer.style.opacity = 1;
+    countriesContainer.style.opacity = 1;
 };
 
 /////////////////////////////////////// 
@@ -209,8 +209,10 @@ const getCountryAndNeighbor = function(country){
             countriesContainer.style.opacity = 1;
         });
     };
-    *****/
-    
+    *********/
+
+
+    /*********
     const getCountryData = function(country){
         // Country 1
         getJSON(`https://restcountries.eu/rest/v2/name/${country}`, 'Country not found')
@@ -241,8 +243,10 @@ const getCountryAndNeighbor = function(country){
     // btn.addEventListener('click', getCountryData.bind(null,'china'));
 
     // getCountryData('Russia'); // trying to read inexisting country data
+*********************/
 
-    /*****
+
+    /***************
     // Resolved promise
     console.log("Test start");
     setTimeout(()=> console.log('0 sec timer'), 0); // will be stored in callback queue
@@ -273,7 +277,7 @@ const getCountryAndNeighbor = function(country){
     lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
     ******/
 
-    // /*********
+    /*********
     // Promisifying setTimoeout
     const wait = function(seconds){
         return new Promise(function(resolve){
@@ -315,13 +319,15 @@ const getCountryAndNeighbor = function(country){
 //    Promise.reject(new Error('Problem')).catch(x => console.error(x));
 // **********/
 
+
+/**************
 // Promisifying geolocation
 const getPosition = function(){
     return new Promise(function(resolve, reject){
         // navigator.geolocation.getCurrentPosition(
         //     position => resolve(position), 
         //     err => reject(err));
-        navigator.geolocation.getCurrentPosition(resolve, reject); // the same as above
+        navigator.geolocation.getCurrentPosition(resolve, reject); // the same as above. getCurrentPosition accepts two parameters: success and error. in our case resove and reject
     });
 };
 
@@ -358,7 +364,16 @@ const whereAmI = function(){
 }
 
 btn.addEventListener('click', whereAmI);
+******************/
 
+/***************** 
+// Coding challenge #2
+
+    const wait = function(seconds){
+        return new Promise(function(resolve){
+            setTimeout(resolve, seconds * 1000);
+        });
+    };
 
 const createImage = function(imgPath){
     return new Promise(function(resolve, reject){
@@ -408,4 +423,53 @@ createImage('img/img-1.jpg')
 //         // e.preventDefault();
 //         images.append(img);
 //     })
+// }
+*******************/
+
+/// ASYNC   AWAIT
+const getPosition = function(){
+    return new Promise(function(resolve, reject){
+        navigator.geolocation.getCurrentPosition(resolve, reject); 
+    });
+};
+
+const whereAmI = async function(){
+
+    try{
+    // Geolocation
+    const pos = await getPosition();
+
+    const {latitude, longitude} = pos.coords;
+
+    // Reverse geocoding 
+    const resGeo = await fetch(`https://geocode.xyz/${latitude},${longitude}?geoit=json`);
+    if(!resGeo.ok) throw new Error('Annoying problem!');
+    const dataGeo = await resGeo.json();
+    console.log(dataGeo);
+    
+    // Country data
+    // fetch(`https://restcountries.eu/rest/v2/name/${country}`).then(res => console.log(res)); // exactly the same as under ( the old way)
+    const res = await fetch(`https://restcountries.eu/rest/v2/name/${dataGeo.country}`);
+    if(!res.ok) throw new Error('No such country!');
+    const data = await res.json();
+    console.log(data);
+    renderCountry(data[0]);
+
+    // return res.json(); // the old way
+    }catch(err){
+        console.log(err);
+        renderErr(`Something went wrong 🤷‍♂️ ${err.message}`);
+    }
+};
+
+// whereAmI('uzbekistan').then(data => console.log(data[0].name)) // the old way
+whereAmI();
+console.log('First');
+
+// try{
+//     let y=1;
+//     const x= 4;
+//     x = y;
+// }catch(err){
+//     console.log(err.message);
 // }
