@@ -445,31 +445,44 @@ const whereAmI = async function(){
     const resGeo = await fetch(`https://geocode.xyz/${latitude},${longitude}?geoit=json`);
     if(!resGeo.ok) throw new Error('Annoying problem!');
     const dataGeo = await resGeo.json();
-    console.log(dataGeo);
+    // console.log(dataGeo);
     
     // Country data
     // fetch(`https://restcountries.eu/rest/v2/name/${country}`).then(res => console.log(res)); // exactly the same as under ( the old way)
     const res = await fetch(`https://restcountries.eu/rest/v2/name/${dataGeo.country}`);
     if(!res.ok) throw new Error('No such country!');
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     renderCountry(data[0]);
 
     // return res.json(); // the old way
+     return  `You are in ${dataGeo.city}, ${dataGeo.country}`;
     }catch(err){
         console.log(err);
         renderErr(`Something went wrong 🤷‍♂️ ${err.message}`);
+
+        // Reject promise returned from async function (rethrowing error)
+        throw err;
     }
 };
 
 // whereAmI('uzbekistan').then(data => console.log(data[0].name)) // the old way
-whereAmI();
-console.log('First');
+console.log('1: Will get location');
+// const city = whereAmI();
+// console.log(city);
 
-// try{
-//     let y=1;
-//     const x= 4;
-//     x = y;
-// }catch(err){
-//     console.log(err.message);
-// }
+// whereAmI()
+// .then(city => console.log(`2: ${city}`))
+// .catch(err => console.error(`2: ${err.message}`))
+// .finally(() => console.log('3: Finished getting location'));
+
+// same as above with IFI function
+(async function(){
+    try{
+         const city = await whereAmI();
+         console.log(`2: ${city}`);
+    }catch(err){
+        console.log(`2: ${err.message}`);
+    }
+    console.log('3: Finished getting location');
+})();    
