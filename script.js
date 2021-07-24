@@ -368,7 +368,7 @@ const whereAmI = function(){
 btn.addEventListener('click', whereAmI);
 ******************/
 
-/***************** 
+// /***************** 
 // Coding challenge #2
 
     const wait = function(seconds){
@@ -379,8 +379,9 @@ btn.addEventListener('click', whereAmI);
 
 const createImage = function(imgPath){
     return new Promise(function(resolve, reject){
-      const img = document.createElement('img');
-       img.src = imgPath;
+    
+    const img = document.createElement('img');
+    img.src = imgPath;
 
     img.addEventListener('load', function(){
             images.append(img);
@@ -397,25 +398,25 @@ const createImage = function(imgPath){
 
 let currentImage;
 
-createImage('img/img-1.jpg')
-.then(img => {
-    currentImage = img;
-    console.log('Image 1 has loaded');
-    return wait(2);
-})
-.then(() => {
-    currentImage.style.display = 'none';
-    return createImage('img/img-2.jpg');
-})
-.then(img => {
-    currentImage = img;
-    console.log('Image 2 has loaded');
-    return wait(2);
-})
-.then(() => {
-    currentImage.style.display = 'none';
-})
-.catch(err => console.error(err));
+// createImage('img/img-1.jpg')
+// .then(img => {
+//     currentImage = img;
+//     console.log('Image 1 has loaded');
+//     return wait(2);
+// })
+// .then(() => {
+//     currentImage.style.display = 'none';
+//     return createImage('img/img-2.jpg');
+// })
+// .then(img => {
+//     currentImage = img;
+//     console.log('Image 2 has loaded');
+//     return wait(2);
+// })
+// .then(() => {
+//     currentImage.style.display = 'none';
+// })
+// .catch(err => console.error(err));
 
 
 // function createImage2(url){
@@ -426,7 +427,7 @@ createImage('img/img-1.jpg')
 //         images.append(img);
 //     })
 // }
-*******************/
+// *******************/
 
 /******************
 /// ASYNC   AWAIT
@@ -529,7 +530,9 @@ get3Countries('uzbekistan', 'tajikistan', 'australia');
 // getCountry('uzbekistan', 'tajikistan', 'australia').map(d => d.then(city=>city[0]).then(data =>console.log( data.capital)).catch(err => console.log(err.message))); 
 
 ***********/
-   
+
+/***********
+// PROMISE COMBINATORS
  console.log('Promice.race()');
 // Promice.race() gets an array of promises but the response will be the one promise which arrives first out of all
 (async function(){
@@ -585,3 +588,52 @@ Promise.any([
 ])
 .then(res => console.log(res))
 .catch(err => console.error(err));
+******************/
+
+// Coding challenge #3
+// PART 1
+const loadPause = async function(){
+    try{
+        // load image 1
+        let img = await createImage('img/img-1.jpg');
+        console.log('Image 1 has loaded');
+        await wait(2);
+        img.style.display = 'none';
+        
+        // load image 2
+        img = await createImage('img/img-2.jpg');
+        console.log('Image 2 has loaded');
+        await wait(2);
+        img.style.display = 'none';
+  
+    }
+    catch(err){
+        console.error(err.message);
+    }
+}
+
+// loadPause();
+
+const loadAll = async function(imgArr){
+    try{
+        // my solution
+    //   const imgs = await Promise.all(imgArr.map(img => createImage(img)));
+    //   console.log(imgs);
+    //   imgs.forEach(img => img.classList.add('parallel'));
+
+   // jonas's solution
+   // array of promises img2
+   const imgs2 = imgArr.map(async img => await createImage(img));
+   //    console.log(imgs2);
+    const imgsEl = await Promise.all(imgs2);
+    // console.log(imgsEl);
+
+    imgsEl.forEach(img => img.classList.add('parallel'));
+    }
+    catch(err){
+        console.error(err.message);
+    }
+
+};
+
+loadAll(['img/img-1.jpg','img/img-2.jpg','img/img-3.jpg',]);
