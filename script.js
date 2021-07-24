@@ -491,6 +491,8 @@ console.log('1: Will get location');
 })();    
 ****************************/
 
+/***********
+// Promise.all()
 const get3Countries = async function(c1, c2, c3){
     try{
         // const [data1] = await getJSON(`https://restcountries.eu/rest/v2/name/${c1}`);
@@ -514,3 +516,72 @@ const get3Countries = async function(c1, c2, c3){
 
 get3Countries('uzbekistan', 'tajikistan', 'australia');
 
+
+// // the above one without async await and all() 
+// const getCountry = function(c1, c2,c3){
+//     const city1 = getJSON(`https://restcountries.eu/rest/v2/name/${c1}`);
+//     const city2 = getJSON(`https://restcountries.eu/rest/v2/name/${c2}`);
+//     const city3 = getJSON(`https://restcountries.eu/rest/v2/name/${c3}`);
+
+//     return [city1,city2, city3]; // array of promises
+// }
+
+// getCountry('uzbekistan', 'tajikistan', 'australia').map(d => d.then(city=>city[0]).then(data =>console.log( data.capital)).catch(err => console.log(err.message))); 
+
+***********/
+   
+ console.log('Promice.race()');
+// Promice.race() gets an array of promises but the response will be the one promise which arrives first out of all
+(async function(){
+    try{
+    const res = await Promise.race([
+        getJSON(`https://restcountries.eu/rest/v2/name/italy`),
+        getJSON(`https://restcountries.eu/rest/v2/name/china`),
+        getJSON(`https://restcountries.eu/rest/v2/name/uzbekistan`)
+    ]);
+    console.log(res[0]);
+    }
+    catch (err){
+    console.log(err.message);
+    }
+})();  
+    
+const timeout = function(sec){
+    return new Promise(function(_, reject){
+        setTimeout(function(){
+            reject(new Error('Request took too long!'));
+        }, sec * 1000);
+    });
+};
+
+Promise.race([getJSON(`https://restcountries.eu/rest/v2/name/uzbekistan`), 
+timeout(1)])
+.then(res => console.log(res[0]))
+.catch(err => console.error(err));
+
+// Promise.allSettled
+Promise.allSettled([
+    Promise.resolve('Success'),
+    Promise.reject('ERROR'),
+    Promise.resolve('Another success'),
+])
+.then(res => console.log(res))
+.catch(err => console.error(err));
+
+// difference if all and of allSettled is that the first short circuits if one of the promises is rejected
+Promise.all([
+    Promise.resolve('Success'),
+    Promise.reject('ERROR'),
+    Promise.resolve('Another success'),
+])
+.then(res => console.log(res))
+.catch(err => console.error(err));
+
+// Promise.any ignores all rejected promises
+Promise.any([
+    Promise.resolve('Success'),
+    Promise.reject('ERROR'),
+    Promise.resolve('Another success'),
+])
+.then(res => console.log(res))
+.catch(err => console.error(err));
